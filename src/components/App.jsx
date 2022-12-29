@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { toast } from 'react-toastify';
@@ -10,38 +10,30 @@ import { Loader } from './Loader/Loader';
 import { LoadMore } from './Button/Button';
 import { Modal } from './Modal/Modal';
 
-export class App extends Component {
-  state = {
-    searchQuery: null,
-    images: [],
-    page: 1,
-    error: null,
-    modalImageURL: null,
-    isLoading: false,
-    totalHits: 0,
-    showModal: false,
-  };
+export function App() {
+  const [searchQuery, setSearchQuery] = useState(null);
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [error, setError] = useState(null);
+  const [modalImageURL, setModalImageURL] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [totalHits, setTotalHits] = useState(0);
+  const [showModal, setShowModal] = useState(false);
 
-  componentDidUpdate(_, prevState) {
-    const { searchQuery, page } = this.state;
-    if (
-      (prevState.page !== page && page > 1) ||
-      (searchQuery !== prevState.searchQuery && searchQuery !== '')
-    ) {
-      this.handleFetch();
+  useEffect(() => {
+    if (!searchQuery) {
+      return;
     }
-  }
+    handleFetch();
+  }, [searchQuery, page]);
 
-  handleFetch = async () => {
+  const handleFetch = async () => {
     try {
-      this.setState({ isLoading: true });
-      const { searchQuery, page } = this.state;
+      setIsLoading(true);
       const results = await fetchImages(searchQuery, page);
       const { hits, totalHits } = results.data;
-      this.setState(prevState => ({
-        images: [...prevState.images, ...hits],
-        totalHits: totalHits,
-      }));
+      setImages(prevImages => [...prevImages, ...hits]);
+      setTotalHits(totalHits);
 
       if (hits.length === 0) {
         return toast.error(
@@ -51,65 +43,46 @@ export class App extends Component {
     } catch (error) {
       console.log('Error');
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   };
 
-  handleFormSubmit = search => {
-    const { searchQuery } = this.state;
-    if (searchQuery === search) {
-      return;
-    }
-    this.setState({ searchQuery: search, page: 1, images: [] });
+  const handleFormSubmit = search => {
+    setSearchQuery(search);
+    setPage(1);
+    setImages([]);
   };
 
-  handleItemClick = largeImageURL => {
-
-    this.setState({
-      modalImageURL: largeImageURL,
-      showModal: true,
-    });
+  const handleItemClick = largeImageURL => {
+    setModalImageURL(largeImageURL);
+    setShowModal(true);
   };
 
-  handleOverlayClick = e => {
+  const handleOverlayClick = e => {
     const overlay = document.getElementById('Overlay');
     if (e.target === overlay) {
-      this.setState({ showModal: false });
+      setShowModal(false);
     }
   };
 
-  loadMore = () => {
-    this.setState(({ page }) => {
-      return {
-        page: page + 1,
-      };
-    });
+  const loadMore = () => {
+    setPage(page => page + 1);
   };
 
-  render() {
-    const { images, isLoading, totalHits, showModal, modalImageURL } =
-      this.state;
+  return (
+    <div>
+      <Searchbar searchSubmit={handleFormSubmit} />
 
-    return (
-      <div>
-        <Searchbar searchSubmit={this.handleFormSubmit} />
+      {isLoading ? <Loader /> : null}
 
-        {isLoading ? <Loader /> : null}
+      <ImageGallery images={images} onClick={handleItemClick} />
 
-        <ImageGallery images={images} onClick={this.handleItemClick} />
+      {totalHits > images.length && <LoadMore onClick={loadMore} />}
 
-        {totalHits > images.length && (
-          <LoadMore onClick={this.loadMore} />
-        )}
-
-        <ToastContainer autoClose={3000} theme="colored" />
-        {showModal ? (
-          <Modal
-            onClick={this.handleOverlayClick}
-            largeImageUrl={modalImageURL}
-          />
-        ) : null}
-      </div>
-    );
-  }
+      <ToastContainer autoClose={3000} theme="colored" />
+      {showModal ? (
+        <Modal onClick={handleOverlayClick} largeImageUrl={modalImageURL} />
+      ) : null}
+    </div>
+  );
 }
