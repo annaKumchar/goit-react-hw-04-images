@@ -14,18 +14,13 @@ export function App() {
   const [searchQuery, setSearchQuery] = useState(null);
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
   const [modalImageURL, setModalImageURL] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [totalHits, setTotalHits] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    if (!searchQuery) {
-      return;
-    }
-    handleFetch();
-  }, [searchQuery, page]);
+ 
 
   const handleFetch = async () => {
     try {
@@ -46,6 +41,14 @@ export function App() {
       setIsLoading(false);
     }
   };
+  useEffect(() => {
+    if (!searchQuery) {
+      return;
+    }
+    handleFetch();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, page]);
+
 
   const handleFormSubmit = search => {
     setSearchQuery(search);
