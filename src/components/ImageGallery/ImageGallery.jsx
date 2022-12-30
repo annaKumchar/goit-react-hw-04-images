@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { GalleryEl } from './ImageGallery.styled';
 import { GalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
-import { LoadMore } from 'components/Button/Button';
+
 
 export const ImageGallery = ({ images, onClick, totalHits }) => {
   return (
@@ -17,7 +17,7 @@ export const ImageGallery = ({ images, onClick, totalHits }) => {
           />
         ))}
       </GalleryEl>
-      {images.length < totalHits ? <LoadMore onClick={onClick} /> : null}
+
     </>
   );
 };

@@ -10,6 +10,7 @@ import { Loader } from './Loader/Loader';
 import { LoadMore } from './Button/Button';
 import { Modal } from './Modal/Modal';
 
+
 export function App() {
   const [searchQuery, setSearchQuery] = useState(null);
   const [images, setImages] = useState([]);
@@ -20,9 +21,12 @@ export function App() {
   const [totalHits, setTotalHits] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
- 
+  useEffect(() => {
+    if (!searchQuery) {
+      return;
+    }
 
-  const handleFetch = async () => {
+    const handleFetch = async () => {
     try {
       setIsLoading(true);
       const results = await fetchImages(searchQuery, page);
@@ -41,12 +45,9 @@ export function App() {
       setIsLoading(false);
     }
   };
-  useEffect(() => {
-    if (!searchQuery) {
-      return;
-    }
+
     handleFetch();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [searchQuery, page]);
 
 
@@ -61,13 +62,11 @@ export function App() {
     setShowModal(true);
   };
 
-  const handleOverlayClick = e => {
-    const overlay = document.getElementById('Overlay');
-    if (e.target === overlay) {
-      setShowModal(false);
-    }
-  };
+  const handleCloseModal = e => {
 
+      setShowModal(false);
+    
+  };
   const loadMore = () => {
     setPage(page => page + 1);
   };
@@ -84,7 +83,7 @@ export function App() {
 
       <ToastContainer autoClose={3000} theme="colored" />
       {showModal ? (
-        <Modal onClick={handleOverlayClick} largeImageUrl={modalImageURL} />
+        <Modal onClick={handleCloseModal} largeImageUrl={modalImageURL} />
       ) : null}
     </div>
   );
